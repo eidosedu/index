@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Eidos - Catálogo Pedagógico</title>
     
-    <!-- Configurações PWA (Instalação e Tela Cheia) -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ffffff">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Eidos">
-    <!-- Adicione no seu repositório um ícone 192x192 com este nome: -->
     <link rel="apple-touch-icon" href="icon-192x192.png">
 
     <style>
@@ -48,7 +46,6 @@
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Header Global */
         header { background-color: var(--surface); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
         .header-left { display: flex; align-items: center; }
         .back-btn { background: none; border: none; cursor: pointer; display: none; color: var(--text-main); padding: 4px; margin-right: 10px; }
@@ -64,7 +61,6 @@
         .icon-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .badge { position: absolute; top: -2px; right: -2px; background: var(--danger); color: white; font-size: 11px; font-weight: bold; height: 18px; min-width: 18px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 5px; display: none; border: 2px solid var(--surface); }
 
-        /* Tela 1: Início */
         .greeting-section { padding: 30px 20px 20px 20px; }
         .greeting-text { font-size: 32px; font-weight: 700; color: var(--text-main); line-height: 1.2; }
         .greeting-sub { font-size: 18px; color: var(--text-muted); margin-top: 6px; }
@@ -92,7 +88,6 @@
         .fav-list-item:active { background: #f1f5f9; }
         .fav-list-item svg { width: 24px; height: 24px; fill: none; stroke: var(--border); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;}
 
-        /* Tela 2: Blocos de Disciplina */
         .search-blocks-section { padding: 20px; }
         .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         .blocks-grid-container { max-width: 650px; margin: 0 auto; }
@@ -105,7 +100,6 @@
 
         @media (max-width: 500px) { .block-card { width: calc(50% - 16px); } }
 
-        /* Tela 3: Resultados e Filtros */
         .search-area { padding: 20px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 9; }
         .search-bar-wrap { position: relative; margin-bottom: 15px; }
         .search-bar { width: 100%; padding: 16px 20px 16px 48px; border: 1px solid var(--border); border-radius: 28px; font-size: 18px; outline: none; background: var(--bg-color); transition: border 0.2s; color: var(--text-main); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
@@ -121,7 +115,6 @@
         .chip { background: #eff6ff; color: var(--primary); border: 1px solid #bfdbfe; border-radius: 14px; padding: 8px 16px; font-size: 16px; font-weight: 600; display: flex; align-items: center; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .chip .chip-close { width: 18px; height: 18px; cursor: pointer; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-left: 10px;}
 
-        /* Lista de Apps */
         .app-list { padding: 20px; display: flex; flex-direction: column; }
         .app-item { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px; }
         .app-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -144,7 +137,6 @@
         .empty-state svg { width: 72px; height: 72px; fill: none; stroke: var(--border); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 20px; }
         .btn-clear { background: var(--surface); border: 1px solid var(--border); color: var(--text-main); padding: 12px 24px; border-radius: 24px; font-size: 16px; font-weight: 600; margin-top: 15px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
 
-        /* Modais */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s; backdrop-filter: blur(2px); }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content { background: var(--surface); border: 1px solid var(--border); width: 90%; max-width: 400px; border-radius: 20px; padding: 28px; transform: translateY(20px); transition: transform 0.2s; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
@@ -172,6 +164,19 @@
 
         #offline-banner { background-color: var(--warning); color: #fff; text-align: center; font-size: 14px; padding: 8px; font-weight: 600; display: none; }
         .error-msg { color: var(--danger); font-size: 14px; margin-bottom: 16px; font-weight: 600; display: none; }
+
+        /* Banner de Instalação PWA */
+        .install-banner { position: fixed; bottom: -150px; left: 0; width: 100%; background: var(--surface); padding: 16px 20px; box-shadow: 0 -4px 16px rgba(0,0,0,0.1); border-top: 1px solid var(--border); transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; display: flex; flex-direction: column; }
+        .install-banner.show { bottom: 0; }
+        .install-banner-content { display: flex; align-items: center; }
+        .install-icon { width: 48px; height: 48px; background: #eff6ff; color: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 16px; }
+        .install-icon svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .install-text { display: flex; flex-direction: column; }
+        .install-text strong { font-size: 16px; color: var(--text-main); }
+        .install-text span { font-size: 14px; color: var(--text-muted); line-height: 1.3; margin-top: 2px; }
+        .install-actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+        .btn-install-pri { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer; margin-left: 12px; }
+        .btn-install-sec { background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -331,6 +336,22 @@
         </div>
     </div>
 
+    <div id="pwa-install-banner" class="install-banner">
+        <div class="install-banner-content">
+            <div class="install-icon">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </div>
+            <div class="install-text">
+                <strong>Instalar Aplicativo</strong>
+                <span>Acesse offline e em tela cheia direto da sua tela inicial.</span>
+            </div>
+        </div>
+        <div class="install-actions">
+            <button class="btn-install-sec" onclick="fecharBannerInstalacao()">Agora não</button>
+            <button class="btn-install-pri" onclick="instalarPWA()">Instalar</button>
+        </div>
+    </div>
+
     <script>
         var API_URL = 'https://eidosedu.github.io/indexador-eidos/recursos.json';
         
@@ -342,6 +363,7 @@
         
         var configSeguranca = JSON.parse(localStorage.getItem('eidos_config') || '{"nome": "Professor", "senha": "", "blockFav": false, "blockExec": false}');
         var acaoPendente = null;
+        var deferredPrompt = null;
         
         var DISCIPLINAS = {
             "Matemática": { corBg: "var(--bg-mat)", corIcon: "var(--icon-mat)", icon: '<rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><path d="M8 10h.01M12 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"></path>' },
@@ -369,12 +391,8 @@
                         processarNovidades(dadosAPI);
                         appsData = dadosAPI;
                         concluirInicializacao();
-                    } catch (e) {
-                        iniciarModoOffline();
-                    }
-                } else {
-                    iniciarModoOffline();
-                }
+                    } catch (e) { iniciarModoOffline(); }
+                } else { iniciarModoOffline(); }
             };
 
             xhr.onerror = function() { iniciarModoOffline(); };
@@ -709,16 +727,40 @@
 
         window.onload = inicializar;
 
-        // Registro do Service Worker (PWA Offline)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('sw.js').then(function(registration) {
-                    console.log('ServiceWorker registrado com sucesso no escopo: ', registration.scope);
-                }, function(err) {
-                    console.log('Falha ao registrar o ServiceWorker: ', err);
-                });
+                    console.log('ServiceWorker registrado: ', registration.scope);
+                }).catch(function(err) {});
             });
         }
+
+        // Lógica do Banner de Instalação PWA
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            setTimeout(function() {
+                document.getElementById('pwa-install-banner').classList.add('show');
+            }, 1500); // Exibe após 1.5s
+        });
+
+        function fecharBannerInstalacao() {
+            document.getElementById('pwa-install-banner').classList.remove('show');
+        }
+
+        function instalarPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function(choiceResult) {
+                    deferredPrompt = null;
+                    fecharBannerInstalacao();
+                });
+            }
+        }
+        
+        window.addEventListener('appinstalled', function() {
+            fecharBannerInstalacao();
+        });
     </script>
 </body>
 </html>
