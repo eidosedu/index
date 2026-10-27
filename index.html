@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Eidos - Catálogo Pedagógico</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #cbd5e1;
+            --border-soft: #e2e8f0;
+            --primary: #2563eb;
+            --fav-bg: #fef08a;
+            --fav-icon: #eab308;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow: 0 6px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+            
+            --bg-mat: #e0f2fe; --icon-mat: #0284c7;  
+            --bg-port: #fee2e2; --icon-port: #ef4444; 
+            --bg-hist: #fef3c7; --icon-hist: #d97706; 
+            --bg-geo: #f3e8ff; --icon-geo: #9333ea;   
+            --bg-cie: #dcfce7; --icon-cie: #16a34a;   
+            --bg-edf: #fce7f3; --icon-edf: #db2777;   
+            --bg-mus: #ffedd5; --icon-mus: #ea580c;   
+            --bg-out: #f1f5f9; --icon-out: #475569;   
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
+
+        main { max-width: 900px; margin: 0 auto; position: relative; }
+        .screen { display: none; padding-bottom: 100px; animation: fadeIn 0.3s ease-in-out; min-height: calc(100vh - 65px); }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Header Global */
+        header { background-color: var(--surface); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .header-left { display: flex; align-items: center; }
+        .back-btn { background: none; border: none; cursor: pointer; display: none; color: var(--text-main); padding: 4px; margin-right: 10px; }
+        .back-btn svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        
+        .logo { font-size: 24px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; display: flex; align-items: center; }
+        .logo svg { margin-right: 6px; }
+        
+        .header-actions { display: flex; align-items: center; }
+        .header-actions > *:not(:last-child) { margin-right: 10px; }
+        .icon-btn { background: none; border: none; cursor: pointer; padding: 8px; color: var(--text-muted); border-radius: 50%; transition: background 0.2s; position: relative; display: flex; align-items: center; justify-content: center;}
+        .icon-btn:active { background: var(--border-soft); }
+        .icon-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .badge { position: absolute; top: -2px; right: -2px; background: var(--danger); color: white; font-size: 11px; font-weight: bold; height: 18px; min-width: 18px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 5px; display: none; border: 2px solid var(--surface); }
+
+        /* Tela 1: Início */
+        .greeting-section { padding: 30px 20px 20px 20px; }
+        .greeting-text { font-size: 32px; font-weight: 700; color: var(--text-main); line-height: 1.2; }
+        .greeting-sub { font-size: 18px; color: var(--text-muted); margin-top: 6px; }
+
+        .empty-favorites { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; }
+        .empty-favorites p { font-size: 18px; }
+        .pulse-btn { background: var(--primary); border: none; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); animation: pulse 2s infinite; cursor: pointer; margin-top: 24px; color: white;}
+        .pulse-btn svg { width: 36px; height: 36px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;}
+
+        /* Botão FAB de Pesquisa */
+        .fab-search { position: fixed; bottom: 24px; right: 24px; background: var(--primary); color: white; width: 64px; height: 64px; border-radius: 50%; display: none; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(37,99,235,0.4); border: none; cursor: pointer; z-index: 50; transition: transform 0.1s; }
+        .fab-search:active { transform: scale(0.92); box-shadow: 0 2px 8px rgba(37,99,235,0.4); }
+        .fab-search svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* Sanfona de Favoritos */
+        .favorites-container { padding: 0 20px; }
+        .subject-group { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow); }
+        .subject-header { padding: 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 600; font-size: 20px; }
+        .subject-info { display: flex; align-items: center; }
+        .subject-info .subject-icon { margin-right: 16px; }
+        .subject-icon { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0,0,0,0.05); }
+        .subject-icon svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;}
+        .chevron { width: 28px; height: 28px; fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.3s; }
+        .subject-group.open .chevron { transform: rotate(180deg); }
+        .subject-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: var(--bg-color); }
+        .fav-list-item { padding: 18px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 18px; font-weight: 500; }
+        .fav-list-item:active { background: #f1f5f9; }
+        .fav-list-item svg { width: 24px; height: 24px; fill: none; stroke: var(--border); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;}
+
+        /* Tela 2: Blocos de Disciplina (Compatibilidade Android 7 s/ Grid Gap e Aspect Ratio) */
+        .search-blocks-section { padding: 20px; }
+        .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .blocks-grid-container { max-width: 650px; margin: 0 auto; }
+        .blocks-grid { display: flex; flex-wrap: wrap; margin: -8px; }
+        .block-card { width: calc(25% - 16px); margin: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px 8px; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow); transition: transform 0.1s, box-shadow 0.1s; }
+        .block-card:active { transform: scale(0.95); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .block-card .subject-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0,0,0,0.05); margin-bottom: 12px; }
+        .block-card .subject-icon svg { width: 28px; height: 28px; }
+        .block-name { font-size: 15px; font-weight: 600; color: var(--text-main); text-align: center; line-height: 1.1; }
+
+        @media (max-width: 500px) {
+            .block-card { width: calc(50% - 16px); }
+        }
+
+        /* Tela 3: Resultados e Filtros */
+        .search-area { padding: 20px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 9; }
+        .search-bar-wrap { position: relative; margin-bottom: 15px; }
+        .search-bar { width: 100%; padding: 16px 20px 16px 48px; border: 1px solid var(--border); border-radius: 28px; font-size: 18px; outline: none; background: var(--bg-color); transition: border 0.2s; color: var(--text-main); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .search-bar:focus { border-color: var(--primary); }
+        .search-icon-input { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;}
+        
+        .filters-row { display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; padding-bottom: 5px; }
+        .filters-row::-webkit-scrollbar { display: none; }
+        .filters-row > * { margin-right: 12px; }
+        .filter-select-wrap { position: relative; flex-shrink: 0; }
+        .filter-select { appearance: none; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 36px 10px 16px; font-size: 16px; font-weight: 600; color: var(--text-main); outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .select-arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+        .chip { background: #eff6ff; color: var(--primary); border: 1px solid #bfdbfe; border-radius: 14px; padding: 8px 16px; font-size: 16px; font-weight: 600; display: flex; align-items: center; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .chip .chip-close { width: 18px; height: 18px; cursor: pointer; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-left: 10px;}
+
+        /* Lista de Apps */
+        .app-list { padding: 20px; display: flex; flex-direction: column; }
+        .app-item { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px; }
+        .app-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .app-title-area { flex: 1; display: flex; align-items: center; cursor: pointer; }
+        .app-title { font-size: 18px; font-weight: 600; margin-left: 16px; }
+        .app-actions { display: flex; align-items: center; }
+        
+        .btn-star { background: none; border: 1px solid transparent; cursor: pointer; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-right: 12px; }
+        .btn-star svg { width: 26px; height: 26px; fill: none; stroke: #94a3b8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; }
+        .btn-star.active { background: var(--fav-bg); border-color: #fde047; animation: pop 0.3s ease-out; }
+        .btn-star.active svg { fill: var(--fav-icon); stroke: var(--fav-icon); }
+
+        .btn-play { background: var(--primary); border: none; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 4px; color: white; box-shadow: 0 4px 6px rgba(37,99,235,0.2); }
+        .btn-play svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-left: 2px;}
+
+        .app-desc-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: var(--bg-color); }
+        .app-desc-inner { padding: 20px; font-size: 16px; color: var(--text-main); line-height: 1.5; border-top: 1px solid var(--border); }
+        
+        .empty-state { text-align: center; padding: 40px 20px; }
+        .empty-state svg { width: 72px; height: 72px; fill: none; stroke: var(--border); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 20px; }
+        .btn-clear { background: var(--surface); border: 1px solid var(--border); color: var(--text-main); padding: 12px 24px; border-radius: 24px; font-size: 16px; font-weight: 600; margin-top: 15px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+
+        /* Modais */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s; backdrop-filter: blur(2px); }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: var(--surface); border: 1px solid var(--border); width: 90%; max-width: 400px; border-radius: 20px; padding: 28px; transform: translateY(20px); transition: transform 0.2s; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+        .modal-body { font-size: 16px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; max-height: 300px; overflow-y: auto; }
+        
+        .setting-section-title { font-size: 14px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; margin-top: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-text { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px; outline: none; font-size: 16px; margin-bottom: 8px; }
+        .input-text:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        
+        .checkbox-group { display: flex; flex-direction: column; margin-bottom: 24px; margin-top: 12px; }
+        .checkbox-label { display: flex; align-items: center; font-size: 16px; color: var(--text-main); cursor: pointer; margin-bottom: 14px; }
+        .checkbox-label input { width: 22px; height: 22px; accent-color: var(--primary); cursor: pointer; margin-right: 12px; }
+
+        .modal-footer { display: flex; justify-content: flex-end; }
+        .btn { padding: 12px 24px; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; border: none; }
+        .btn:last-child { margin-left: 12px; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
+        .btn-secondary { background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); }
+        
+        .notification-item { padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 16px; display: flex; align-items: center; }
+        .notification-item:last-child { border-bottom: none; }
+        .new-badge { color: var(--danger); font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 8px; background: #fee2e2; border: 1px solid #fca5a5; margin-right: 12px;}
+
+        #offline-banner { background-color: var(--warning); color: #fff; text-align: center; font-size: 14px; padding: 8px; font-weight: 600; display: none; }
+        .error-msg { color: var(--danger); font-size: 14px; margin-bottom: 16px; font-weight: 600; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="offline-banner">Modo Offline ativado</div>
+
+    <header>
+        <div class="header-left">
+            <button class="back-btn" id="btn-voltar" onclick="handleAndroidBack()">
+                <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </button>
+            <div class="logo" id="header-logo">
+                <svg viewBox="0 0 24 24" style="width:34px; height:34px;">
+                    <circle cx="12" cy="12" r="11" fill="var(--primary)"></circle>
+                    <path d="M15 7H9.5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1H15M8.5 12H14" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                Eidos
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="icon-btn" onclick="abrirNotificacoes()">
+                <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <div class="badge" id="notif-badge">0</div>
+            </button>
+            <button class="icon-btn" onclick="abrirModal('modal-settings')">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <main id="screen-home" class="screen active">
+        <div class="greeting-section">
+            <div class="greeting-text" id="greeting-title">Olá</div>
+            <div class="greeting-sub">O que vamos explorar hoje?</div>
+        </div>
+
+        <div id="home-empty-state" class="empty-favorites">
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Você ainda não tem favoritos.<br>Busque por recursos e salve aqui!</p>
+            <button class="pulse-btn" onclick="navegarPara('search-entry')">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+        </div>
+
+        <div id="home-favorites-list" class="favorites-container"></div>
+        
+        <button class="fab-search" id="fab-search" onclick="navegarPara('search-entry')">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+    </main>
+
+    <main id="screen-search-entry" class="screen">
+        <div class="search-blocks-section">
+            <div class="section-title">O que está buscando?</div>
+            <div class="blocks-grid-container">
+                <div class="blocks-grid" id="discipline-blocks"></div>
+            </div>
+        </div>
+    </main>
+
+    <main id="screen-search-results" class="screen">
+        <div class="search-area">
+            <div class="search-bar-wrap">
+                <svg class="search-icon-input" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="searchInput" class="search-bar" placeholder="Buscar aplicativo..." oninput="aplicarFiltros()">
+            </div>
+            
+            <div class="filters-row">
+                <div class="filter-select-wrap">
+                    <select id="select-disciplina" class="filter-select" onchange="selecionarDisciplina(this.value)">
+                        <option value="">Disciplina</option>
+                    </select>
+                    <svg class="select-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                
+                <div id="chip-disciplina" class="chip" style="display:none;">
+                    <span id="chip-disciplina-text">Matemática</span>
+                    <svg class="chip-close" onclick="limparDisciplina()" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </div>
+
+                <div class="filter-select-wrap">
+                    <select id="select-competencia" class="filter-select" onchange="aplicarFiltros()">
+                        <option value="">Competência</option>
+                    </select>
+                    <svg class="select-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+            </div>
+        </div>
+
+        <div id="results-list" class="app-list"></div>
+
+        <div id="results-empty" class="empty-state" style="display:none;">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <h3>Nenhum recurso encontrado</h3>
+            <p style="color: var(--text-muted); font-size: 16px; margin-top: 5px;">Tente ajustar os filtros ou a busca.</p>
+            <button class="btn-clear" onclick="limparTodosFiltros()">Limpar Filtros</button>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="modal-notif" onclick="fecharModalClickFora(event, 'modal-notif')">
+        <div class="modal-content">
+            <h3 class="modal-title">Novos Recursos</h3>
+            <div class="modal-body" id="notif-list">Nenhuma novidade no momento.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="fecharModal('modal-notif')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-settings">
+        <div class="modal-content">
+            <h3 class="modal-title">Configurações</h3>
+            
+            <div class="setting-section-title">Perfil</div>
+            <input type="text" id="input-name" class="input-text" placeholder="Nome do Professor">
+            
+            <div class="setting-section-title">Segurança Escolar</div>
+            <input type="password" id="input-pwd" class="input-text" placeholder="Senha (Deixe branco p/ inativar)">
+            
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="chk-block-fav"> Exigir senha para alterar Favoritos
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="chk-block-exec"> Exigir senha para abrir Jogos
+                </label>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="fecharModal('modal-settings')">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarConfiguracoes()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-senha">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--danger);">Acesso Restrito</h3>
+            <div style="font-size: 15px; color: var(--text-muted); margin-bottom: 16px;">Insira a senha do professor para continuar.</div>
+            <input type="password" id="input-check-pwd" class="input-text" placeholder="Senha">
+            <div id="senha-error" class="error-msg">Senha incorreta. Tente novamente.</div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cancelarAcaoSegura()">Cancelar</button>
+                <button class="btn btn-primary" style="background: var(--danger); border-color: var(--danger);" onclick="confirmarSenha()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-saida">
+        <div class="modal-content">
+            <h3 class="modal-title">Sair do Catálogo</h3>
+            <div style="font-size: 16px; color: var(--text-muted); margin-bottom: 20px;">Deseja realmente encerrar a aplicação?</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="fecharModal('modal-saida')">Cancelar</button>
+                <button class="btn btn-primary" style="background: var(--danger); border-color: var(--danger);" onclick="confirmarSaida()">Sair</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var API_URL = 'https://eidosedu.github.io/indexador-eidos/recursos.json';
+        
+        var appsData = [];
+        var novasAdicoes = [];
+        var favoritos = JSON.parse(localStorage.getItem('eidos_favoritos') || '[]');
+        var telaAtual = 'home';
+        var filtroDisciplinaAtual = '';
+        
+        // Motor de Segurança
+        var configSeguranca = JSON.parse(localStorage.getItem('eidos_config') || '{"nome": "Professor", "senha": "", "blockFav": false, "blockExec": false}');
+        var acaoPendente = null;
+        
+        var DISCIPLINAS = {
+            "Matemática": { corBg: "var(--bg-mat)", corIcon: "var(--icon-mat)", icon: '<rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><path d="M8 10h.01M12 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"></path>' },
+            "Português": { corBg: "var(--bg-port)", corIcon: "var(--icon-port)", icon: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>' },
+            "História": { corBg: "var(--bg-hist)", corIcon: "var(--icon-hist)", icon: '<path d="M6 2h12v4l-4 4-2 2-2-2-4-4V2z"/><path d="M6 22h12v-4l-4-4-2-2-2 2-4 4v4z"/>' },
+            "Geografia": { corBg: "var(--bg-geo)", corIcon: "var(--icon-geo)", icon: '<circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>' },
+            "Ciências": { corBg: "var(--bg-cie)", corIcon: "var(--icon-cie)", icon: '<path d="M10 2v7.31L4 18.5a2 2 0 0 0 1.73 3h12.54a2 2 0 0 0 1.73-3L14 9.31V2h-4z"/><line x1="8.5" y1="2" x2="15.5" y2="2"/>' },
+            "Educação Física": { corBg: "var(--bg-edf)", corIcon: "var(--icon-edf)", icon: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>' },
+            "Música": { corBg: "var(--bg-mus)", corIcon: "var(--icon-mus)", icon: '<path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle>' },
+            "Outros": { corBg: "var(--bg-out)", corIcon: "var(--icon-out)", icon: '<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>' }
+        };
+
+        function inicializar() {
+            carregarConfiguracoesIniciais();
+            
+            var xhr = new XMLHttpRequest();
+            xhr.timeout = 5000; // Timeout seguro para conexões presas na escola
+            xhr.open('GET', API_URL, true);
+
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var dadosAPI = JSON.parse(xhr.responseText);
+                        localStorage.setItem('eidos_apps', JSON.stringify(dadosAPI));
+                        processarNovidades(dadosAPI);
+                        appsData = dadosAPI;
+                        concluirInicializacao();
+                    } catch (e) {
+                        iniciarModoOffline();
+                    }
+                } else {
+                    iniciarModoOffline();
+                }
+            };
+
+            xhr.onerror = function() {
+                iniciarModoOffline();
+            };
+
+            xhr.ontimeout = function() {
+                iniciarModoOffline();
+            };
+
+            xhr.send();
+        }
+
+        function iniciarModoOffline() {
+            document.getElementById('offline-banner').style.display = 'block';
+            var salvos = localStorage.getItem('eidos_apps');
+            if (salvos) {
+                try {
+                    appsData = JSON.parse(salvos);
+                } catch(e) {
+                    appsData = [];
+                }
+            } else {
+                appsData = [];
+            }
+            concluirInicializacao();
+        }
+
+        function concluirInicializacao() {
+            processarDados();
+            renderizarHome();
+            renderizarBlocosBusca();
+        }
+
+        function carregarConfiguracoesIniciais() {
+            var h = new Date().getHours();
+            var saudacao = h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+            document.getElementById('greeting-title').innerText = saudacao + ", " + configSeguranca.nome + "!";
+            
+            document.getElementById('input-name').value = configSeguranca.nome;
+            document.getElementById('input-pwd').value = configSeguranca.senha;
+            document.getElementById('chk-block-fav').checked = configSeguranca.blockFav;
+            document.getElementById('chk-block-exec').checked = configSeguranca.blockExec;
+        }
+
+        function salvarConfiguracoes() {
+            configSeguranca.nome = document.getElementById('input-name').value.trim() || "Professor";
+            configSeguranca.senha = document.getElementById('input-pwd').value;
+            configSeguranca.blockFav = document.getElementById('chk-block-fav').checked;
+            configSeguranca.blockExec = document.getElementById('chk-block-exec').checked;
+            
+            localStorage.setItem('eidos_config', JSON.stringify(configSeguranca));
+            carregarConfiguracoesIniciais();
+            fecharModal('modal-settings');
+        }
+
+        function solicitarSenha(acao) {
+            if (!configSeguranca.senha) { acao(); return; }
+            acaoPendente = acao;
+            document.getElementById('input-check-pwd').value = '';
+            document.getElementById('senha-error').style.display = 'none';
+            abrirModal('modal-senha');
+        }
+
+        function confirmarSenha() {
+            var digitada = document.getElementById('input-check-pwd').value;
+            if (digitada === configSeguranca.senha) {
+                fecharModal('modal-senha');
+                if (acaoPendente) acaoPendente();
+                acaoPendente = null;
+            } else {
+                document.getElementById('senha-error').style.display = 'block';
+            }
+        }
+
+        function cancelarAcaoSegura() {
+            acaoPendente = null;
+            fecharModal('modal-senha');
+        }
+
+        function acaoFavoritoSegura(id, btnElem) {
+            if (configSeguranca.blockFav && configSeguranca.senha) {
+                solicitarSenha(function() { toggleFavorito(id, btnElem); });
+            } else {
+                toggleFavorito(id, btnElem);
+            }
+        }
+
+        function acaoAbrirAppSegura(url) {
+            if (configSeguranca.blockExec && configSeguranca.senha) {
+                solicitarSenha(function() { abrirApp(url); });
+            } else {
+                abrirApp(url);
+            }
+        }
+
+        function processarNovidades(dadosRecentes) {
+            var ultimoVisto = parseInt(localStorage.getItem('eidos_last_count') || '0');
+            var totalAtual = dadosRecentes.length;
+            
+            if (totalAtual > ultimoVisto) {
+                var qtdNovos = totalAtual - ultimoVisto;
+                novasAdicoes = dadosRecentes.slice(-qtdNovos);
+                
+                var badge = document.getElementById('notif-badge');
+                badge.innerText = qtdNovos;
+                badge.style.display = 'flex';
+                
+                var htmlNotif = '';
+                novasAdicoes.forEach(function(app) {
+                    htmlNotif += '<div class="notification-item"><span class="new-badge">NOVO</span> ' + app.nome + '</div>';
+                });
+                document.getElementById('notif-list').innerHTML = htmlNotif;
+            }
+        }
+
+        function abrirNotificacoes() {
+            abrirModal('modal-notif');
+            localStorage.setItem('eidos_last_count', appsData.length.toString());
+            document.getElementById('notif-badge').style.display = 'none';
+        }
+
+        function navegarPara(idTela) {
+            var screens = document.querySelectorAll('.screen');
+            for(var i = 0; i < screens.length; i++) {
+                screens[i].classList.remove('active');
+            }
+            document.getElementById('screen-' + idTela).classList.add('active');
+            telaAtual = idTela;
+            
+            document.getElementById('btn-voltar').style.display = (idTela === 'home') ? 'none' : 'block';
+            document.getElementById('header-logo').style.display = (idTela === 'home') ? 'flex' : 'none';
+
+            if(idTela === 'home') renderizarHome();
+            if(idTela === 'search-results') renderizarListaApps();
+        }
+
+        function obterDisciplina(tags) {
+            for (var i = 0; i < tags.length; i++) {
+                if (DISCIPLINAS[tags[i]]) return tags[i];
+            }
+            return "Outros";
+        }
+
+        function processarDados() {
+            var selectDisc = document.getElementById('select-disciplina');
+            var selectComp = document.getElementById('select-competencia');
+            var competencias = new Set();
+            
+            selectDisc.innerHTML = '<option value="">Disciplina</option>';
+            Object.keys(DISCIPLINAS).forEach(function(d) {
+                selectDisc.innerHTML += '<option value="' + d + '">' + d + '</option>';
+            });
+
+            appsData.forEach(function(app) {
+                app.disciplina = obterDisciplina(app.tags);
+                app.tags.forEach(function(t) {
+                    if(!DISCIPLINAS[t]) competencias.add(t);
+                });
+            });
+
+            selectComp.innerHTML = '<option value="">Competência</option>';
+            competencias.forEach(function(c) {
+                selectComp.innerHTML += '<option value="' + c + '">' + c + '</option>';
+            });
+        }
+
+        function selecionarDisciplina(disc) {
+            filtroDisciplinaAtual = disc;
+            var select = document.getElementById('select-disciplina');
+            var chip = document.getElementById('chip-disciplina');
+            
+            if(disc) {
+                select.style.display = 'none';
+                chip.style.display = 'flex';
+                document.getElementById('chip-disciplina-text').innerText = disc;
+            } else {
+                select.style.display = 'block';
+                select.value = '';
+                chip.style.display = 'none';
+            }
+            if(telaAtual !== 'search-results') navegarPara('search-results');
+            aplicarFiltros();
+        }
+
+        function limparDisciplina() { selecionarDisciplina(''); }
+
+        function limparTodosFiltros() {
+            limparDisciplina();
+            document.getElementById('select-competencia').value = '';
+            document.getElementById('searchInput').value = '';
+            aplicarFiltros();
+        }
+
+        function aplicarFiltros() {
+            var texto = document.getElementById('searchInput').value.toLowerCase();
+            var comp = document.getElementById('select-competencia').value;
+            renderizarListaApps(texto, filtroDisciplinaAtual, comp);
+        }
+
+        function renderizarHome() {
+            var favContainer = document.getElementById('home-favorites-list');
+            var emptyState = document.getElementById('home-empty-state');
+            var fabBtn = document.getElementById('fab-search');
+            
+            if (favoritos.length === 0) {
+                favContainer.innerHTML = '';
+                emptyState.style.display = 'flex';
+                fabBtn.style.display = 'none'; 
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            fabBtn.style.display = 'flex';
+            favContainer.innerHTML = '';
+            
+            var appsFav = appsData.filter(function(a) { return favoritos.indexOf(a.id) !== -1; });
+            var porDisciplina = {};
+            
+            appsFav.forEach(function(app) {
+                if(!porDisciplina[app.disciplina]) porDisciplina[app.disciplina] = [];
+                porDisciplina[app.disciplina].push(app);
+            });
+
+            for (var disc in porDisciplina) {
+                var conf = DISCIPLINAS[disc];
+                var listHtml = porDisciplina[disc].map(function(app) {
+                    return '<div class="fav-list-item" onclick="acaoAbrirAppSegura(\'' + app.url + '\')">' +
+                           '<span>' + app.nome + '</span>' +
+                           '<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>' +
+                           '</div>';
+                }).join('');
+
+                favContainer.innerHTML += 
+                    '<div class="subject-group" id="grp-' + disc + '">' +
+                        '<div class="subject-header" onclick="toggleSanfona(this.nextElementSibling, this.parentElement)">' +
+                            '<div class="subject-info">' +
+                                '<div class="subject-icon" style="background: ' + conf.corBg + '; color: ' + conf.corIcon + '">' +
+                                    '<svg viewBox="0 0 24 24">' + conf.icon + '</svg>' +
+                                '</div>' +
+                                '<span>' + disc + '</span>' +
+                            '</div>' +
+                            '<svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
+                        '</div>' +
+                        '<div class="subject-content">' + listHtml + '</div>' +
+                    '</div>';
+            }
+        }
+
+        function renderizarBlocosBusca() {
+            var grid = document.getElementById('discipline-blocks');
+            grid.innerHTML = '';
+            for (var disc in DISCIPLINAS) {
+                var conf = DISCIPLINAS[disc];
+                grid.innerHTML += 
+                    '<div class="block-card" onclick="selecionarDisciplina(\'' + disc + '\')">' +
+                        '<div class="subject-icon" style="background: ' + conf.corBg + '; color: ' + conf.corIcon + '">' +
+                            '<svg viewBox="0 0 24 24">' + conf.icon + '</svg>' +
+                        '</div>' +
+                        '<div class="block-name">' + disc + '</div>' +
+                    '</div>';
+            }
+        }
+
+        function renderizarListaApps(busca, disc, comp) {
+            busca = busca || '';
+            disc = disc || '';
+            comp = comp || '';
+            
+            var container = document.getElementById('results-list');
+            var empty = document.getElementById('results-empty');
+            container.innerHTML = '';
+
+            var filtrados = appsData.filter(function(app) {
+                var contemBusca = false;
+                for(var i = 0; i < app.tags.length; i++) {
+                    if (app.tags[i].toLowerCase().indexOf(busca) !== -1) contemBusca = true;
+                }
+                var matchBusca = app.nome.toLowerCase().indexOf(busca) !== -1 || contemBusca;
+                var matchDisc = disc === '' || app.disciplina === disc;
+                var matchComp = comp === '' || app.tags.indexOf(comp) !== -1;
+                return matchBusca && matchDisc && matchComp;
+            });
+
+            if (filtrados.length === 0) {
+                empty.style.display = 'block';
+            } else {
+                empty.style.display = 'none';
+                filtrados.forEach(function(app) {
+                    var isFav = (favoritos.indexOf(app.id) !== -1) ? 'active' : '';
+                    var conf = DISCIPLINAS[app.disciplina];
+                    container.innerHTML += 
+                        '<div class="app-item">' +
+                            '<div class="app-header">' +
+                                '<div class="app-title-area" onclick="toggleSanfona(this.parentElement.nextElementSibling)">' +
+                                    '<div class="subject-icon" style="background: ' + conf.corBg + '; color: ' + conf.corIcon + '; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; border: 1px solid rgba(0,0,0,0.05);">' +
+                                        '<svg style="width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;" viewBox="0 0 24 24">' + conf.icon + '</svg>' +
+                                    '</div>' +
+                                    '<span class="app-title">' + app.nome + '</span>' +
+                                '</div>' +
+                                '<div class="app-actions">' +
+                                    '<button class="btn-star ' + isFav + '" onclick="acaoFavoritoSegura(\'' + app.id + '\', this)">' +
+                                        '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>' +
+                                    '</button>' +
+                                    '<button class="btn-play" onclick="acaoAbrirAppSegura(\'' + app.url + '\')">' +
+                                        '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>' +
+                                    '</button>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="app-desc-wrapper">' +
+                                '<div class="app-desc-inner">' + app.descricao + '</div>' +
+                            '</div>' +
+                        '</div>';
+                });
+            }
+        }
+
+        function toggleSanfona(contentElem, groupElem) {
+            if (contentElem.style.maxHeight && contentElem.style.maxHeight !== '0px') {
+                contentElem.style.maxHeight = '0px';
+                if(groupElem) groupElem.classList.remove('open');
+            } else {
+                contentElem.style.maxHeight = contentElem.scrollHeight + "px";
+                if(groupElem) groupElem.classList.add('open');
+            }
+        }
+
+        function toggleFavorito(id, btnElem) {
+            var index = favoritos.indexOf(id);
+            if (index !== -1) {
+                favoritos.splice(index, 1);
+                btnElem.classList.remove('active');
+            } else {
+                favoritos.push(id);
+                btnElem.classList.add('active');
+            }
+            localStorage.setItem('eidos_favoritos', JSON.stringify(favoritos));
+            renderizarHome(); 
+        }
+
+        function abrirModal(id) { document.getElementById(id).classList.add('active'); }
+        function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
+        function fecharModalClickFora(event, id) { 
+            if (id !== 'modal-settings' && id !== 'modal-senha' && id !== 'modal-saida') {
+                if (event.target.id === id) fecharModal(id); 
+            }
+        }
+
+        function receberTextoDoKodular(texto) { console.log("Kodular enviou:", texto); }
+        function abrirApp(url) { window.location.href = url; }
+        
+        function confirmarSaida() {
+            fecharModal('modal-saida');
+            if (window.AppInventor) window.AppInventor.setWebViewString('FECHAR_APP');
+        }
+
+        function handleAndroidBack() {
+            var modaisAbertos = document.querySelectorAll('.modal-overlay.active');
+            if (modaisAbertos.length > 0) {
+                if(document.getElementById('modal-senha').classList.contains('active')) {
+                    cancelarAcaoSegura();
+                } else {
+                    for(var i = 0; i < modaisAbertos.length; i++) {
+                        modaisAbertos[i].classList.remove('active');
+                    }
+                }
+                return;
+            }
+            if (telaAtual === 'search-results') {
+                navegarPara('search-entry');
+                return;
+            }
+            if (telaAtual === 'search-entry') {
+                navegarPara('home');
+                return;
+            }
+            abrirModal('modal-saida');
+        }
+
+        window.onload = inicializar;
+    </script>
+</body>
+</html>
