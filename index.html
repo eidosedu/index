@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Eidos - Catálogo Pedagógico</title>
+    
+    <!-- Configurações PWA (Instalação e Tela Cheia) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Eidos">
+    <!-- Adicione no seu repositório um ícone 192x192 com este nome: -->
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -63,12 +74,10 @@
         .pulse-btn { background: var(--primary); border: none; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); animation: pulse 2s infinite; cursor: pointer; margin-top: 24px; color: white;}
         .pulse-btn svg { width: 36px; height: 36px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;}
 
-        /* Botão FAB de Pesquisa */
         .fab-search { position: fixed; bottom: 24px; right: 24px; background: var(--primary); color: white; width: 64px; height: 64px; border-radius: 50%; display: none; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(37,99,235,0.4); border: none; cursor: pointer; z-index: 50; transition: transform 0.1s; }
         .fab-search:active { transform: scale(0.92); box-shadow: 0 2px 8px rgba(37,99,235,0.4); }
         .fab-search svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-        /* Sanfona de Favoritos */
         .favorites-container { padding: 0 20px; }
         .subject-group { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow); }
         .subject-header { padding: 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 600; font-size: 20px; }
@@ -83,7 +92,7 @@
         .fav-list-item:active { background: #f1f5f9; }
         .fav-list-item svg { width: 24px; height: 24px; fill: none; stroke: var(--border); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;}
 
-        /* Tela 2: Blocos de Disciplina (Compatibilidade Android 7 s/ Grid Gap e Aspect Ratio) */
+        /* Tela 2: Blocos de Disciplina */
         .search-blocks-section { padding: 20px; }
         .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         .blocks-grid-container { max-width: 650px; margin: 0 auto; }
@@ -94,9 +103,7 @@
         .block-card .subject-icon svg { width: 28px; height: 28px; }
         .block-name { font-size: 15px; font-weight: 600; color: var(--text-main); text-align: center; line-height: 1.1; }
 
-        @media (max-width: 500px) {
-            .block-card { width: calc(50% - 16px); }
-        }
+        @media (max-width: 500px) { .block-card { width: calc(50% - 16px); } }
 
         /* Tela 3: Resultados e Filtros */
         .search-area { padding: 20px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 9; }
@@ -333,7 +340,6 @@
         var telaAtual = 'home';
         var filtroDisciplinaAtual = '';
         
-        // Motor de Segurança
         var configSeguranca = JSON.parse(localStorage.getItem('eidos_config') || '{"nome": "Professor", "senha": "", "blockFav": false, "blockExec": false}');
         var acaoPendente = null;
         
@@ -352,7 +358,7 @@
             carregarConfiguracoesIniciais();
             
             var xhr = new XMLHttpRequest();
-            xhr.timeout = 5000; // Timeout seguro para conexões presas na escola
+            xhr.timeout = 5000;
             xhr.open('GET', API_URL, true);
 
             xhr.onload = function() {
@@ -371,14 +377,8 @@
                 }
             };
 
-            xhr.onerror = function() {
-                iniciarModoOffline();
-            };
-
-            xhr.ontimeout = function() {
-                iniciarModoOffline();
-            };
-
+            xhr.onerror = function() { iniciarModoOffline(); };
+            xhr.ontimeout = function() { iniciarModoOffline(); };
             xhr.send();
         }
 
@@ -386,14 +386,8 @@
             document.getElementById('offline-banner').style.display = 'block';
             var salvos = localStorage.getItem('eidos_apps');
             if (salvos) {
-                try {
-                    appsData = JSON.parse(salvos);
-                } catch(e) {
-                    appsData = [];
-                }
-            } else {
-                appsData = [];
-            }
+                try { appsData = JSON.parse(salvos); } catch(e) { appsData = []; }
+            } else { appsData = []; }
             concluirInicializacao();
         }
 
@@ -407,7 +401,6 @@
             var h = new Date().getHours();
             var saudacao = h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
             document.getElementById('greeting-title').innerText = saudacao + ", " + configSeguranca.nome + "!";
-            
             document.getElementById('input-name').value = configSeguranca.nome;
             document.getElementById('input-pwd').value = configSeguranca.senha;
             document.getElementById('chk-block-fav').checked = configSeguranca.blockFav;
@@ -419,7 +412,6 @@
             configSeguranca.senha = document.getElementById('input-pwd').value;
             configSeguranca.blockFav = document.getElementById('chk-block-fav').checked;
             configSeguranca.blockExec = document.getElementById('chk-block-exec').checked;
-            
             localStorage.setItem('eidos_config', JSON.stringify(configSeguranca));
             carregarConfiguracoesIniciais();
             fecharModal('modal-settings');
@@ -444,39 +436,27 @@
             }
         }
 
-        function cancelarAcaoSegura() {
-            acaoPendente = null;
-            fecharModal('modal-senha');
-        }
+        function cancelarAcaoSegura() { acaoPendente = null; fecharModal('modal-senha'); }
 
         function acaoFavoritoSegura(id, btnElem) {
-            if (configSeguranca.blockFav && configSeguranca.senha) {
-                solicitarSenha(function() { toggleFavorito(id, btnElem); });
-            } else {
-                toggleFavorito(id, btnElem);
-            }
+            if (configSeguranca.blockFav && configSeguranca.senha) { solicitarSenha(function() { toggleFavorito(id, btnElem); }); } 
+            else { toggleFavorito(id, btnElem); }
         }
 
         function acaoAbrirAppSegura(url) {
-            if (configSeguranca.blockExec && configSeguranca.senha) {
-                solicitarSenha(function() { abrirApp(url); });
-            } else {
-                abrirApp(url);
-            }
+            if (configSeguranca.blockExec && configSeguranca.senha) { solicitarSenha(function() { abrirApp(url); }); } 
+            else { abrirApp(url); }
         }
 
         function processarNovidades(dadosRecentes) {
             var ultimoVisto = parseInt(localStorage.getItem('eidos_last_count') || '0');
             var totalAtual = dadosRecentes.length;
-            
             if (totalAtual > ultimoVisto) {
                 var qtdNovos = totalAtual - ultimoVisto;
                 novasAdicoes = dadosRecentes.slice(-qtdNovos);
-                
                 var badge = document.getElementById('notif-badge');
                 badge.innerText = qtdNovos;
                 badge.style.display = 'flex';
-                
                 var htmlNotif = '';
                 novasAdicoes.forEach(function(app) {
                     htmlNotif += '<div class="notification-item"><span class="new-badge">NOVO</span> ' + app.nome + '</div>';
@@ -493,23 +473,17 @@
 
         function navegarPara(idTela) {
             var screens = document.querySelectorAll('.screen');
-            for(var i = 0; i < screens.length; i++) {
-                screens[i].classList.remove('active');
-            }
+            for(var i = 0; i < screens.length; i++) { screens[i].classList.remove('active'); }
             document.getElementById('screen-' + idTela).classList.add('active');
             telaAtual = idTela;
-            
             document.getElementById('btn-voltar').style.display = (idTela === 'home') ? 'none' : 'block';
             document.getElementById('header-logo').style.display = (idTela === 'home') ? 'flex' : 'none';
-
             if(idTela === 'home') renderizarHome();
             if(idTela === 'search-results') renderizarListaApps();
         }
 
         function obterDisciplina(tags) {
-            for (var i = 0; i < tags.length; i++) {
-                if (DISCIPLINAS[tags[i]]) return tags[i];
-            }
+            for (var i = 0; i < tags.length; i++) { if (DISCIPLINAS[tags[i]]) return tags[i]; }
             return "Outros";
         }
 
@@ -517,19 +491,14 @@
             var selectDisc = document.getElementById('select-disciplina');
             var selectComp = document.getElementById('select-competencia');
             var competencias = new Set();
-            
             selectDisc.innerHTML = '<option value="">Disciplina</option>';
             Object.keys(DISCIPLINAS).forEach(function(d) {
                 selectDisc.innerHTML += '<option value="' + d + '">' + d + '</option>';
             });
-
             appsData.forEach(function(app) {
                 app.disciplina = obterDisciplina(app.tags);
-                app.tags.forEach(function(t) {
-                    if(!DISCIPLINAS[t]) competencias.add(t);
-                });
+                app.tags.forEach(function(t) { if(!DISCIPLINAS[t]) competencias.add(t); });
             });
-
             selectComp.innerHTML = '<option value="">Competência</option>';
             competencias.forEach(function(c) {
                 selectComp.innerHTML += '<option value="' + c + '">' + c + '</option>';
@@ -540,7 +509,6 @@
             filtroDisciplinaAtual = disc;
             var select = document.getElementById('select-disciplina');
             var chip = document.getElementById('chip-disciplina');
-            
             if(disc) {
                 select.style.display = 'none';
                 chip.style.display = 'flex';
@@ -637,7 +605,6 @@
             busca = busca || '';
             disc = disc || '';
             comp = comp || '';
-            
             var container = document.getElementById('results-list');
             var empty = document.getElementById('results-empty');
             container.innerHTML = '';
@@ -731,24 +698,27 @@
                 if(document.getElementById('modal-senha').classList.contains('active')) {
                     cancelarAcaoSegura();
                 } else {
-                    for(var i = 0; i < modaisAbertos.length; i++) {
-                        modaisAbertos[i].classList.remove('active');
-                    }
+                    for(var i = 0; i < modaisAbertos.length; i++) { modaisAbertos[i].classList.remove('active'); }
                 }
                 return;
             }
-            if (telaAtual === 'search-results') {
-                navegarPara('search-entry');
-                return;
-            }
-            if (telaAtual === 'search-entry') {
-                navegarPara('home');
-                return;
-            }
+            if (telaAtual === 'search-results') { navegarPara('search-entry'); return; }
+            if (telaAtual === 'search-entry') { navegarPara('home'); return; }
             abrirModal('modal-saida');
         }
 
         window.onload = inicializar;
+
+        // Registro do Service Worker (PWA Offline)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').then(function(registration) {
+                    console.log('ServiceWorker registrado com sucesso no escopo: ', registration.scope);
+                }, function(err) {
+                    console.log('Falha ao registrar o ServiceWorker: ', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>
